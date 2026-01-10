@@ -29,7 +29,7 @@ services:
       - "9001:9001"
 
   api:
-    image: node:22-alpine
+    image: node:25-alpine
     container_name: backtobackup-api
     restart: on-failure
     environment:
@@ -42,6 +42,9 @@ services:
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       JWT_SECRET: ${JWT_SECRET:-your_jwt_secret}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your_jwt_refresh_secret}
+      JWT_REGISTER_DEVICE_SECRET: ${JWT_REGISTER_DEVICE_SECRET:-your_jwt_register_device_secret}
+      JWT_DEVICE_SECRET: ${JWT_DEVICE_SECRET:-your_jwt_device_secret}
+      JWT_DEVICE_REFRESH_SECRET: ${JWT_DEVICE_REFRESH_SECRET:-your_jwt_device_refresh_secret}
     entrypoint: ['/bin/sh', '-c', 'echo "This is a dev container, application is launched via exec command" && while :; do sleep 2073600; done']
     volumes:
       - ../:/root/app
