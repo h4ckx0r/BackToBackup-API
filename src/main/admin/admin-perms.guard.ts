@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
+import { FastifyRequest } from 'fastify';
 import { UserDto } from '../database/models/dto/user.dto';
 import { PermissionLevel, Permissions } from '../database/models/entity/role.entity';
 
@@ -12,8 +12,8 @@ export const CheckRolePermission = (scope: keyof Permissions, allowedRoles: Perm
 @Injectable()
 export class AdminPermsGuard implements CanActivate {
   constructor(
-    private reflector: Reflector,
-    private jwtService: JwtService,
+    private readonly reflector: Reflector,
+    private readonly jwtService: JwtService,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -21,7 +21,7 @@ export class AdminPermsGuard implements CanActivate {
 
     if (!scopePermissions) return true;
 
-    const req: Request = context.switchToHttp().getRequest();
+    const req: FastifyRequest = context.switchToHttp().getRequest();
     const jwtPayload: { user: UserDto } = this.jwtService.decode(req.cookies?.token as string);
 
     if (!jwtPayload.user?.effectivePermissions?.[scopePermissions.scope]?.includes(scopePermissions.allowedRoles)) {

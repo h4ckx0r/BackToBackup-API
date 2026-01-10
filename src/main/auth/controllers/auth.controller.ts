@@ -20,7 +20,7 @@ import {
   ApiOkResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Response } from 'express';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { ValidationError } from 'src/common-utils';
 import { UserDto } from '../../database/models/dto/user.dto';
 import { RolesService } from '../../database/roles/roles.service';
@@ -34,6 +34,8 @@ import { LocalAuthGuard } from '../guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
+  private readonly secureCookie: boolean = process.env.NODE_ENV === 'production';
+  private readonly sameSiteOption: 'strict' | 'lax' | 'none' = process.env.NODE_ENV === 'production' ? 'strict' : 'lax';
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
@@ -51,19 +53,21 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @HttpCode(200)
   @Post('login')
-  async login(@Body() userDto: LoginUserDto, @Res() res: Response) {
+  async login(@Body() userDto: LoginUserDto, @Res() res: FastifyReply) {
     const { user, token, refreshToken } = await this.authService.loginUser(userDto);
     res.cookie('token', token.access_token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 40 * 24 * 60 * 60 * 1000, // 40 días
+      secure: this.secureCookie,
+      sameSite: this.sameSiteOption,
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000, // 1 día
     });
 
     res.cookie('refresh_token', refreshToken.refresh_token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+      secure: this.secureCookie,
+      sameSite: this.sameSiteOption,
+      path: '/',
       maxAge: 40 * 24 * 60 * 60 * 1000, // 40 días
     });
 
@@ -85,20 +89,22 @@ export class AuthController {
   })
   @HttpCode(201)
   @Post('register')
-  async register(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
+  async register(@Body() createUserDto: CreateUserDto, @Res() res: FastifyReply) {
     try {
       const { user, token, refreshToken } = await this.authService.registerUser(createUserDto);
       res.cookie('token', token.access_token, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 40 * 24 * 60 * 60 * 1000, // 40 días
+        secure: this.secureCookie,
+        sameSite: this.sameSiteOption,
+        path: '/',
+        maxAge: 24 * 60 * 60 * 1000, // 1 día
       });
 
       res.cookie('refresh_token', refreshToken.refresh_token, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
+        secure: this.secureCookie,
+        sameSite: this.sameSiteOption,
+        path: '/',
         maxAge: 40 * 24 * 60 * 60 * 1000, // 40 días
       });
 
@@ -124,13 +130,14 @@ export class AuthController {
   @UseGuards(JwtRefreshAuthGuard)
   @HttpCode(200)
   @Post('refresh')
-  refreshToken(@Request() req: Request & { user: { user: UserDto } }, @Res() res: Response) {
+  refreshToken(@Request() req: FastifyRequest & { user: { user: UserDto } }, @Res() res: FastifyReply) {
     const token = this.authService.createJWT(req.user.user);
     res.cookie('token', token.access_token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 40 * 24 * 60 * 60 * 1000, // 40 días
+      secure: this.secureCookie,
+      sameSite: this.sameSiteOption,
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000, // 1 día
     });
     res.send();
   }
@@ -145,7 +152,7 @@ export class AuthController {
   })
   @HttpCode(200)
   @Post('logout')
-  logout(@Res() res: Response) {
+  logout(@Res() res: FastifyReply) {
     res.clearCookie('token');
     res.clearCookie('refresh_token');
     res.send();
@@ -165,7 +172,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
   @Get('me')
-  async getMe(@Request() req: Request & { user: { user: UserDto } }) {
+  async getMe(@Request() req: FastifyRequest & { user: { user: UserDto } }) {
     const user = await this.usersService.findOne(req.user.user.id, true);
     if (!user) {
       throw new UnauthorizedException();

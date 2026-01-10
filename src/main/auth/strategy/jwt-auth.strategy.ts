@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-jwt';
 import { UserDto } from '../../database/models/dto/user.dto';
 import { UsersService } from '../../database/users/users.service';
+import { FastifyRequest } from 'fastify';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -16,7 +17,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new Error('JWT_SECRET no está definido en el archivo .env');
     }
     super({
-      jwtFromRequest: (req: { cookies: { token: string } }): string => req.cookies.token,
+      jwtFromRequest: (req: FastifyRequest): string => {
+        return req.cookies?.token || '';
+      },
       ignoreExpiration: false,
       secretOrKey: jwtSecret,
     });

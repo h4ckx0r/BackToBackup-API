@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { NewRoleDto } from '../../admin/dto/newRole.dto';
 import { EffectivePermissions, RoleDto } from '../models/dto/role.dto';
 import { PermissionLevel, RoleEntity } from '../models/entity/role.entity';
 
@@ -23,14 +24,12 @@ export class RolesService {
     return RoleDto.fromEntity(role);
   }
 
-  async create(role: RoleDto): Promise<RoleEntity> {
-    const roleEntity = RoleDto.toEntity(role);
-    return await this.roleRepository.save(roleEntity);
+  async create(role: NewRoleDto): Promise<RoleEntity> {
+    return await this.roleRepository.save(role);
   }
 
   async update(id: string, role: RoleDto): Promise<UpdateResult> {
-    const roleEntity = RoleDto.toEntity(role);
-    const updatedRole = await this.roleRepository.update(id, roleEntity);
+    const updatedRole = await this.roleRepository.update(id, role);
     return updatedRole;
   }
 
