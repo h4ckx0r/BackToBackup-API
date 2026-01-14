@@ -1,9 +1,6 @@
 pipeline {
   agent {
-    docker {
-      image 'node:24-bookworm'
-      args '-u root:root'
-    }
+    label 'nodejs'
   }
 
   options {
