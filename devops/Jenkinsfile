@@ -2,6 +2,9 @@ pipeline {
   agent {
     label 'nodejs'
   }
+  tools {
+    nodejs 'nodejs-24'
+  }
 
   options {
     timestamps()
