@@ -25,10 +25,7 @@ export class DevicesService {
   }
 
   generateRegisterToken(device: DeviceEntity): string {
-    return this.jwtService.sign(
-      { deviceId: device.id },
-      { secret: this.configService.get<string>('JWT_REGISTER_DEVICE_SECRET'), expiresIn: '24h' },
-    );
+    return this.jwtService.sign({ deviceId: device.id }, { secret: this.configService.get<string>('JWT_REGISTER_DEVICE_SECRET'), expiresIn: '24h' });
   }
 
   async registerDevice(deviceId: string): Promise<DeviceEntity> {

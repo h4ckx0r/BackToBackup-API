@@ -9,11 +9,7 @@ describe('AuthService', () => {
     const mockJwtService: any = {};
     const mockRolesService: any = {};
 
-    service = new AuthService(
-      mockUsersService,
-      mockJwtService,
-      mockRolesService,
-    );
+    service = new AuthService(mockUsersService, mockJwtService, mockRolesService);
   });
 
   it('should be defined', () => {
