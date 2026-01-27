@@ -64,7 +64,7 @@ export class UsersService {
       userEntity.roles = [roleSaved];
     }
     const userSaved = await this.userRepository.save(userEntity);
-    return UserDto.fromEntity(userSaved, this.rolesService.calculateEfectivePermissions(userSaved.roles));
+    return UserDto.fromEntity(userSaved, this.rolesService.calculateEffectivePermissions(userSaved.roles));
   }
 
   async deleteOne(id: string): Promise<DeleteResult> {
@@ -84,7 +84,7 @@ export class UsersService {
     Object.assign(user, userDto);
 
     const userSaved = await this.userRepository.save(user);
-    return UserDto.fromEntity(userSaved, this.rolesService.calculateEfectivePermissions(userSaved.roles));
+    return UserDto.fromEntity(userSaved, this.rolesService.calculateEffectivePermissions(userSaved.roles));
   }
 
   async getUsers(pageOptionsDto: PageOptionsDto): Promise<PageDto<UserWithRolesDto>> {
@@ -99,7 +99,7 @@ export class UsersService {
 
     // Convertir a DTO y eliminar contraseñas usando desestructuración
     const userDtos: UserWithRolesDto[] = users.map((user: UserEntity) => {
-      const userDto = UserDto.fromEntity(user, this.rolesService.calculateEfectivePermissions(user.roles));
+      const userDto = UserDto.fromEntity(user, this.rolesService.calculateEffectivePermissions(user.roles));
       const userWithRolesDto = new UserWithRolesDto(userDto);
       userWithRolesDto.roles = user.roles;
       return userWithRolesDto;

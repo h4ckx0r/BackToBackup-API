@@ -37,7 +37,7 @@ export class RolesService {
     return await this.roleRepository.delete(id);
   }
 
-  calculateEfectivePermissions(roles: RoleEntity[] | RoleDto[]): EffectivePermissions {
+  calculateEffectivePermissions(roles: RoleEntity[] | RoleDto[]): EffectivePermissions {
     if (!roles || roles.length === 0) {
       return {};
     }

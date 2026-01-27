@@ -113,7 +113,6 @@ export class AuthController {
       if (error instanceof ValidationError) {
         throw new BadRequestException(error.message);
       } else {
-        console.error('Error al registrar el usuario:', error);
         throw new InternalServerErrorException('Error al registrar el usuario');
       }
     }
@@ -177,6 +176,6 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException();
     }
-    return UserDto.fromEntity(user, this.rolesService.calculateEfectivePermissions(user.roles));
+    return UserDto.fromEntity(user, this.rolesService.calculateEffectivePermissions(user.roles));
   }
 }

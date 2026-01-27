@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DeviceDto } from '../models/dto/device.dto';
 import { DeviceEntity } from '../models/entity/device.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DevicesService {
@@ -11,6 +12,7 @@ export class DevicesService {
     @InjectRepository(DeviceEntity)
     private readonly deviceRepository: Repository<DeviceEntity>,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   getDevicesByUser(userId: string): Promise<DeviceEntity[]> {
@@ -23,7 +25,10 @@ export class DevicesService {
   }
 
   generateRegisterToken(device: DeviceEntity): string {
-    return this.jwtService.sign({ deviceId: device.id }, { secret: process.env.JWT_REGISTER_DEVICE_SECRET, expiresIn: '24h' });
+    return this.jwtService.sign(
+      { deviceId: device.id },
+      { secret: this.configService.get<string>('JWT_REGISTER_DEVICE_SECRET'), expiresIn: '24h' },
+    );
   }
 
   async registerDevice(deviceId: string): Promise<DeviceEntity> {
@@ -31,7 +36,7 @@ export class DevicesService {
     if (device?.refresh_token) {
       throw new BadRequestException('El dispositivo ya está registrado');
     } else if (device) {
-      device.refresh_token = this.jwtService.sign({ deviceId: device.id }, { secret: process.env.JWT_DEVICE_REFRESH_SECRET });
+      device.refresh_token = this.jwtService.sign({ deviceId: device.id }, { secret: this.configService.get<string>('JWT_DEVICE_REFRESH_SECRET') });
       return await this.deviceRepository.save(device);
     } else {
       throw new BadRequestException('El dispositivo no existe');
@@ -48,7 +53,7 @@ export class DevicesService {
     if (!device) {
       throw new BadRequestException('El dispositivo no existe');
     }
-    return this.jwtService.sign({ device: DeviceDto.fromEntity(device) }, { secret: process.env.JWT_DEVICE_REFRESH_SECRET });
+    return this.jwtService.sign({ device: DeviceDto.fromEntity(device) }, { secret: this.configService.get<string>('JWT_DEVICE_REFRESH_SECRET') });
   }
 
   async getSocketIdByDeviceId(userId: string, deviceId: string): Promise<string | null> {

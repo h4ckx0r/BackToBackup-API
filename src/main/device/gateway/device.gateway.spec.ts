@@ -6,7 +6,7 @@ describe('DeviceGateway', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [DeviceGateway],
+      providers: [DeviceGateway],
     }).compile();
 
     controller = module.get<DeviceGateway>(DeviceGateway);

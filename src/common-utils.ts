@@ -1,9 +1,9 @@
-import { Request } from 'express';
 import { UserDto } from './main/database/models/dto/user.dto';
+import { FastifyRequest } from 'fastify';
 
 export type LoginRequestWithUser = {
   user: UserDto;
-} & Omit<Request, 'user'>;
+} & Omit<FastifyRequest, 'user'>;
 
 export type LoggedInTokenPayload = {
   id: string;
@@ -11,14 +11,14 @@ export type LoggedInTokenPayload = {
 };
 export type LoggedInRequestWithUser = {
   user: LoggedInTokenPayload;
-} & Omit<Request, 'user'>;
+} & Omit<FastifyRequest, 'user'>;
 
 export type RefreshTokenPayload = {
   id: string;
 };
 export type RefreshRequestWithUser = {
   user: RefreshTokenPayload;
-} & Omit<Request, 'user'>;
+} & Omit<FastifyRequest, 'user'>;
 
 export class ValidationError extends Error {
   constructor(message: string) {

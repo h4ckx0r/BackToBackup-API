@@ -1,12 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-//import * as bcrypt from 'bcrypt';
 import { compareSync, hash } from 'bcrypt';
 import { UserDto } from '../database/models/dto/user.dto';
 import { RolesService } from '../database/roles/roles.service';
 import { UsersService } from '../database/users/users.service';
 import { CreateUserDto } from './dto/createUser.dto';
 import { LoginUserDto } from './dto/loginUser.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +14,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly rolesService: RolesService,
+    private readonly configService: ConfigService,
   ) {}
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findOneByEmail(email);
@@ -29,8 +30,8 @@ export class AuthService {
       access_token: this.jwtService.sign(
         { user: userDto },
         {
-          secret: process.env.JWT_SECRET,
-          expiresIn: '5m',
+          secret: this.configService.get<string>('JWT_SECRET'),
+          expiresIn: '15m',
         },
       ),
     };
@@ -41,7 +42,7 @@ export class AuthService {
       refresh_token: this.jwtService.sign(
         { user: userDto },
         {
-          secret: process.env.JWT_REFRESH_SECRET,
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
           expiresIn: '30d',
         },
       ),
@@ -64,7 +65,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const loggedUserDto = UserDto.fromEntity(user, this.rolesService.calculateEfectivePermissions(user.roles));
+    const loggedUserDto = UserDto.fromEntity(user, this.rolesService.calculateEffectivePermissions(user.roles));
     const token = this.createJWT(loggedUserDto);
     const refreshToken = this.createRefreshToken(loggedUserDto);
     return { user: loggedUserDto, token, refreshToken };

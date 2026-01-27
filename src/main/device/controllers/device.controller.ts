@@ -39,7 +39,7 @@ export class DeviceController {
   @Get('registerDevice')
   @HttpCode(200)
   @UseGuards(JwtRegisterDeviceGuard)
-  async registerDevice(@Req() req: Request & { user: { deviceId: string } }) {
+  async registerDevice(@Req() req: FastifyRequest & { user: { deviceId: string } }) {
     return await this.deviceService.registerDevice(req.user.deviceId);
   }
 
