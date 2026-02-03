@@ -1,5 +1,5 @@
 # Stage 1: Build the NestJS application
-FROM node:22-alpine AS builder
+FROM node:25-alpine AS builder
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -13,7 +13,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Production image
-FROM node:22-alpine
+FROM node:25-alpine
 
 # Set production environment
 ENV NODE_ENV=production

@@ -1,0 +1,31 @@
+pipeline {
+  agent {
+    label 'nodejs'
+  }
+  tools {
+    nodejs 'nodejs-24'
+  }
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+  }
+
+  environment {
+    CI = 'true'
+  }
+
+  stages {
+    stage('Checkout') { steps { checkout scm } }
+
+    stage('Install') { steps { sh 'npm ci' } }
+
+    stage('Format check') { steps { sh 'npm run format:check' } }
+
+    stage('Lint') { steps { sh 'npm run lint' } }
+
+//     stage('Test') { steps { sh 'npm test' } }
+
+    stage('Build') { steps { sh 'npm run build' } }
+  }
+}

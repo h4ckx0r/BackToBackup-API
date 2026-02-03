@@ -1,0 +1,55 @@
+
+services:
+  db:
+    image: postgres:15
+    container_name: backtobackup-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+#  minio:
+#    image: minio/minio:latest
+#    container_name: backtobackup-minio
+#    restart: always
+#    environment:
+#      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+#      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+#
+#    command: server /data --console-address ":9001"
+#    volumes:
+#      - ./data/minio:/data
+#    ports:
+#      - "9000:9000"
+#      - "9001:9001"
+
+  api:
+    image: node:25-alpine
+    container_name: backtobackup-api
+    restart: on-failure
+    environment:
+      DB_HOST: ${POSTGRES_HOST:-db}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+#      MINIO_ENDPOINT: http://minio:9000
+#      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+#      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your_jwt_refresh_secret}
+      JWT_REGISTER_DEVICE_SECRET: ${JWT_REGISTER_DEVICE_SECRET:-your_jwt_register_device_secret}
+      JWT_DEVICE_SECRET: ${JWT_DEVICE_SECRET:-your_jwt_device_secret}
+      JWT_DEVICE_REFRESH_SECRET: ${JWT_DEVICE_REFRESH_SECRET:-your_jwt_device_refresh_secret}
+    entrypoint: ['/bin/sh', '-c', 'echo "This is a dev container, application is launched via exec command" && while :; do sleep 2073600; done']
+    volumes:
+      - ../:/root/app
+    depends_on:
+      - db
+#      - minio
+    ports:
+      - "3000:3000"
